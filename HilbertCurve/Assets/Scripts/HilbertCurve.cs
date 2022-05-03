@@ -33,11 +33,15 @@ namespace Runamuck
 
         public Vector2 GetPosition(float t)
         {
-            int i = Mathf.RoundToInt(t * NumberOfPoints);
-            // TODO for partials, find interpolated value between them
-            d2xy(NumberOfPoints, i, out int x1, out int y1);
+            float pointNum = t * NumberOfPoints;
+            int i1 = Mathf.FloorToInt(pointNum);
+            int i2 = Mathf.CeilToInt(pointNum);
 
-            return new Vector2(x1 / (float)SquareSize, y1 / (float)SquareSize);
+            d2xy(NumberOfPoints, i1, out int x1, out int y1);
+            d2xy(NumberOfPoints, i2, out int x2, out int y2);
+
+            return new Vector2(Mathf.Lerp(x1, x2, pointNum - i1) / (float)SquareSize,
+                Mathf.Lerp(y1, y2, pointNum - i1) / (float)SquareSize);
         }
 
         ////convert (x,y) to d
