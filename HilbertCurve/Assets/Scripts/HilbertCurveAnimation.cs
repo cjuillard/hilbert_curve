@@ -54,7 +54,8 @@ namespace Runamuck
                     {
                         animatedObject.t = t;
                         animatedObject.transform.position = GetPosition(t);
-                    }, 1, d1 / animationSpeed));
+                    }, 1, d1 / animationSpeed)
+                    .SetEase(Ease.Linear));
                 }
 
                 if(baseT != 0)
@@ -69,7 +70,8 @@ namespace Runamuck
                     {
                         animatedObject.t = t;
                         animatedObject.transform.position = GetPosition(t);
-                    }, baseT, 1 / animationSpeed));
+                    }, baseT, 1 / animationSpeed)
+                    .SetEase(Ease.Linear));
                 }
             }
 
