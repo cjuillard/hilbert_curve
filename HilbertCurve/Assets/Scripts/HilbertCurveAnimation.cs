@@ -21,12 +21,6 @@ namespace Runamuck
         }
         private List<AnimatedObject> animatedObjects = new List<AnimatedObject>();
 
-        // TODO
-        // - Spawn objects that follow the path
-        // - Figure out a good way to infinite loop
-        // - Test video capture with Unity
-        // - Look into scaling this massively with ECS
-        // - Make something visually intriquing
         void Start()
         {
             DOTween.Init(true, false);
@@ -77,9 +71,17 @@ namespace Runamuck
 
         }
 
-        private Vector3 GetPosition(float t)
+        private Vector3 GetPositionOld(float t)
         {
             Vector2 pos = curve.GetPosition(t);
+            pos *= size;
+
+            return new Vector3(pos.x, pos.y, 0);
+        }
+        private Vector3 GetPosition(float t)
+        {
+            Vector2 pos = curve.GetBezierPosition(t);
+
             pos *= size;
 
             return new Vector3(pos.x, pos.y, 0);
@@ -92,7 +94,14 @@ namespace Runamuck
 
         void Update()
         {
+        }
 
+        private Vector3 NormalizedToWorldPos(Vector2 p)
+        {
+            p *= size;
+            Vector3 v3 = new Vector3(p.x, p.y, 0);
+            v3 = transform.localToWorldMatrix.MultiplyPoint(v3);
+            return v3;
         }
 
         void OnDrawGizmosSelected()

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Runamuck
@@ -33,7 +34,7 @@ namespace Runamuck
 
         public Vector2 GetPosition(float t)
         {
-            float pointNum = t * NumberOfPoints;
+            float pointNum = t * (NumberOfPoints - 1);
             int i1 = Mathf.FloorToInt(pointNum);
             int i2 = Mathf.CeilToInt(pointNum);
 
@@ -42,6 +43,86 @@ namespace Runamuck
 
             return new Vector2(Mathf.Lerp(x1, x2, pointNum - i1) / (float)SquareSize,
                 Mathf.Lerp(y1, y2, pointNum - i1) / (float)SquareSize);
+        }
+
+        public Vector2 GetBezierPosition(float t)
+        {
+            Vector2 pos = GetBezierPosition(t, out _, out _, out _);
+            pos *= 1f / SquareSize;
+            return pos;
+        }
+
+        public Vector2 GetBezierPosition(float t, out Vector2 a, out Vector2 b, out Vector2 c)
+        {
+            float pointNum = t * (NumberOfPoints - 1);
+            int i1 = Mathf.FloorToInt(pointNum);
+            int i2 = Mathf.CeilToInt(pointNum);
+
+            if (i1 == i2)
+            {
+                i2 = Math.Min(NumberOfPoints - 1, i1 + 1);
+            }
+
+            d2xy(NumberOfPoints, i1, out int x1, out int y1);
+            d2xy(NumberOfPoints, i2, out int x2, out int y2);
+
+            Vector2 p0, p1, p2;
+            float normalizedT;
+            if (pointNum - i1 > 0.5f)
+            {
+                int i3 = Math.Min(NumberOfPoints - 1, i2 + 1);
+                if(i3 == i2)    // Handle edge case for end of the curve
+                {
+                    p0 = new Vector2(x1, y1);
+                    p1 = new Vector2(0.5f * (x1 + x2), 0.5f * (y1 + y2));
+                    p2 = new Vector2(x2, y2);
+                    normalizedT = (pointNum - i1) * 2f - 0.5f;
+                }
+                else
+                {
+                    d2xy(NumberOfPoints, i3, out int x3, out int y3);
+                    p0 = new Vector2(x1, y1);
+                    p1 = new Vector2(x2, y2);
+                    p2 = new Vector2(x3, y3);
+                    normalizedT = (pointNum - i1) - 0.5f;
+                }
+                
+            }
+            else
+            {
+                int i3 = Math.Max(0, i1 - 1);
+                if(i3 == i1)    // Edge case for start of the curve
+                {
+                    p0 = new Vector2(x1, y1);
+                    p1 = new Vector2(0.5f * (x1+x2), 0.5f * (y1+y2));
+                    p2 = new Vector2(x2, y2);
+                    normalizedT = (pointNum - i3) * 2f - 0.5f;
+                }
+                else
+                {
+                    d2xy(NumberOfPoints, i3, out int x3, out int y3);
+                    p0 = new Vector2(x3, y3);
+                    p1 = new Vector2(x1, y1);
+                    p2 = new Vector2(x2, y2);
+                    normalizedT = (pointNum - i3) - 0.5f;
+                }
+                
+                
+            }
+
+            Vector2 interp0 = 0.5f * (p0 + p1);
+            Vector2 interp1 = 0.5f * (p2 + p1);
+
+            a = p0;
+            b = p1;
+            c = p2;
+            //Debug.Log($"NormalizeT={normalizedT}");
+            return GetCubicBezier(normalizedT, interp0, p1, interp1);
+        }
+
+        private Vector2 GetCubicBezier(float t, Vector2 p0, Vector2 p1, Vector2 p2)
+        {
+            return p1 + (1 - t) * (1 - t) * (p0 - p1) + t * t * (p2 - p1);
         }
 
         ////convert (x,y) to d
