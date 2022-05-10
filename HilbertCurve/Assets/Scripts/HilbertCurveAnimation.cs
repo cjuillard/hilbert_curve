@@ -48,6 +48,7 @@ namespace Runamuck
                     {
                         animatedObject.t = t;
                         animatedObject.transform.localPosition = GetPosition(t);
+                        animatedObject.transform.rotation = GetRotation(t);
                     }, 1, d1 / animationSpeed)
                     .SetEase(Ease.Linear));
                 }
@@ -58,20 +59,31 @@ namespace Runamuck
                     {
                         animatedObject.t = 0;
                         animatedObject.transform.localPosition = GetPosition(0);
+                        animatedObject.transform.rotation = GetRotation(0);
                     });
                     sequence.Append(
                     DOTween.To(() => animatedObject.t, t =>
                     {
                         animatedObject.t = t;
                         animatedObject.transform.localPosition = GetPosition(t);
-                    }, baseT, 1 / animationSpeed)
+                        animatedObject.transform.rotation = GetRotation(t);
+                    }, baseT, baseT / animationSpeed)
                     .SetEase(Ease.Linear));
                 }
             }
 
         }
 
-        private Vector3 GetPositionOld(float t)
+        public Vector3 rotationSpeed = new Vector3(10, 6, 8);
+        private Quaternion GetRotation(float t)
+        {
+            Vector3 eulerAngles = new Vector3(t * 360 * rotationSpeed.x,
+                t * 360 * rotationSpeed.y + 59,
+                t * 360 * rotationSpeed.z + 35);
+            return Quaternion.Euler(eulerAngles);
+        }
+
+        private Vector3 GetPositionOnHilbertCurve(float t)
         {
             Vector2 pos = curve.GetPosition(t);
             pos *= size;
