@@ -18,7 +18,16 @@ namespace Runamuck
         {
             public float t;
             public Transform transform;
+            public Transformer transformer;
+
+            public virtual void SetT(float t)
+            {
+                this.t = t;
+                if (transformer != null)
+                    transformer.SetTransformT(t);
+            }
         }
+
         private List<AnimatedObject> animatedObjects = new List<AnimatedObject>();
 
         void Start()
@@ -33,7 +42,8 @@ namespace Runamuck
                 var animatedObject = new AnimatedObject
                 {
                     t = i / (float)entityCount,
-                    transform = go.transform
+                    transform = go.transform,
+                    transformer = go.GetComponent<Transformer>()
                 };
                 animatedObjects.Add(animatedObject);
                 Transform entityTransform = go.transform;
@@ -46,7 +56,7 @@ namespace Runamuck
                     sequence.Append(
                     DOTween.To(() => animatedObject.t, t =>
                     {
-                        animatedObject.t = t;
+                        animatedObject.SetT(t);
                         animatedObject.transform.localPosition = GetPosition(t);
                         animatedObject.transform.rotation = GetRotation(t);
                     }, 1, d1 / animationSpeed)
@@ -57,14 +67,14 @@ namespace Runamuck
                 {
                     sequence.AppendCallback(() =>
                     {
-                        animatedObject.t = 0;
+                        animatedObject.SetT(0);
                         animatedObject.transform.localPosition = GetPosition(0);
                         animatedObject.transform.rotation = GetRotation(0);
                     });
                     sequence.Append(
                     DOTween.To(() => animatedObject.t, t =>
                     {
-                        animatedObject.t = t;
+                        animatedObject.SetT(t);
                         animatedObject.transform.localPosition = GetPosition(t);
                         animatedObject.transform.rotation = GetRotation(t);
                     }, baseT, baseT / animationSpeed)
